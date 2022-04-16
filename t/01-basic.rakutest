@@ -1,0 +1,15 @@
+use Test;
+use StaticTemplate::Grammar;
+use StaticTemplate::Action;
+
+my @tests = 
+  "" => "",
+;
+
+for @tests -> $tmpl, $ret {
+  ok StaticTemplate::Grammar.parse($tmpl);
+  ok $ast = StaticTemplate::Grammar.parse($tmpl, :actions(StaticTemplate::Action));
+  is $ast.run, $ret
+}
+
+done-testing;

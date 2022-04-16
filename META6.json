@@ -1,0 +1,38 @@
+{
+  "auth": "zef:FCO",
+  "authors": [
+    ""
+  ],
+  "build-depends": [
+  ],
+  "depends": [
+  ],
+  "description": "blah blah blah",
+  "license": "Artistic-2.0",
+  "name": "StaticTemplate",
+  "perl": "6.d",
+  "provides": {
+    "StaticTemplate": "lib/StaticTemplate.rakumod",
+    "StaticTemplate::Parser": "lib/StaticTemplate/Parser.rakumod",
+    "StaticTemplate::Grammar": "lib/StaticTemplate/Grammar.rakumod",
+    "StaticTemplate::Action": "lib/StaticTemplate/Action.rakumod",
+    "StaticTemplate::Stack": "lib/StaticTemplate/Stack.rakumod",
+    "StaticTemplate::AST::Operation": "lib/StaticTemplate/AST/Operation.rakumod",
+    "StaticTemplate::AST::CompUnit": "lib/StaticTemplate/AST/CompUnit.rakumod",
+    "StaticTemplate::AST::Statement": "lib/StaticTemplate/AST/Statement.rakumod",
+    "StaticTemplate::AST::StatementList": "lib/StaticTemplate/AST/StatementList.rakumod",
+    "StaticTemplate::AST::VariableDeclaration": "lib/StaticTemplate/AST/VariableDeclaration.rakumod",
+    "StaticTemplate::AST::Text": "lib/StaticTemplate/AST/Text.rakumod",
+    "StaticTemplate::AST::Variable": "lib/StaticTemplate/AST/Variable.rakumod",
+    "StaticTemplate::AST::If": "lib/StaticTemplate/AST/If.rakumod",
+    "StaticTemplate::RequirementService": "lib/StaticTemplate/RequirementService.rakumod"
+  },
+  "resources": [
+  ],
+  "source-url": "",
+  "tags": [
+  ],
+  "test-depends": [
+  ],
+  "version": "0.0.1"
+}

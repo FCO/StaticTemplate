@@ -24,3 +24,5 @@ multi method run-op("+", $left, $right) { $left + $right }
 multi method run-op("-", $left, $right) { $left - $right }
 multi method run-op("*", $left, $right) { $left * $right }
 multi method run-op("/", $left, $right) { $left / $right }
+
+multi method run-op("==", $left, $right) { $left == $right }

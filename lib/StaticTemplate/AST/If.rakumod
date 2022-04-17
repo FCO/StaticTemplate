@@ -25,5 +25,11 @@ method gist {
 
 method run {
   # TODO: make it a real if
-  @!conditions.first.value.run()
+  do with @!conditions.first: *.key.run {
+    .value.run
+  } orwith $!else {
+    .run
+  } else {
+    ""
+  }
 }

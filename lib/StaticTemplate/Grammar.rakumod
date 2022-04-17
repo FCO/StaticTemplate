@@ -1,5 +1,6 @@
 #use Grammar::Tracer;
 use StaticTemplate::Stack;
+use StaticTemplate::Type;
 unit grammar StaticTemplate::Grammar;
 
 method error($msg, :$comment) {
@@ -16,11 +17,14 @@ method error($msg, :$comment) {
   exit 1;
 }
 
+my %types = <any number string boolean>.map: { $_ => StaticTemplate::Type.type($_) }
+
 token TOP {
-  <multi-template(StaticTemplate::Stack)>
+  <multi-template(StaticTemplate::Stack, %types)>
 }
-token multi-template($scope) {
+token multi-template($scope, %types) {
   :my $*scope := $scope.new-scope;
+  :my %*types := %types;
   <template>*
 }
 
@@ -32,7 +36,7 @@ token text { [<!start-code>.]+ }
 
 proto rule code {*}
 rule code:sym<val> {
-  <start-val> ~ <end-val> <statement>+ %% ";"
+  <.start-val> ~ <.end-val> <statement>+ %% ";"
 }
 
 token block-tag($name) {
@@ -40,23 +44,23 @@ token block-tag($name) {
 }
 
 rule closing-block-tag($name) {
-  <block-tag($name)> || $ { self.error: "Could not find '\{% $name %}' closing tag", :comment("never closing tag") }
+  <block-tag("end$name")> || $ { self.error: "Could not find '\{% end$name %}' closing for tag '$name'", :comment("never closing tag") }
 }
 
-rule code:sym<if> {
-  <.start-block> ~ <.end-block> [ "if" <condition=.statement> ]
+token code:sym<if> {
+  <.start-block> ~ <.end-block> [ <.ws> <.sym> <.ws> <condition=.statement> <.ws> ]
   {}
   :my $*starting-error := $/.pos;
-  <if-block=multi-template($*scope)>+ % [ <.start-block> ~ <.end-block> [ "elsif" <condition=.statement> ] ]
-  [ <.start-block> ~ <.end-block> "else" <else-block=.multi-template($*scope)> ]?
-  <.closing-block-tag("endif")>
+  <if-block=multi-template($*scope, %*types)>+ % [ <.start-block> ~ <.end-block> [ <.ws> "elsif" <.ws> <condition=.statement> <.ws> ] ]
+  [ <.start-block> ~ <.end-block> [ <.ws> "else" <.ws> ] <else-block=.multi-template($*scope, %*types)> ]?
+  <.closing-block-tag("if")>
 }
 
-rule code:sym<set> {
-  <.start-block> ~ <.end-block> [ "set" <var-name=.word> ]
+token code:sym<set> {
+  <.start-block> ~ <.end-block> [ <.ws> <.sym> <.ws> <var-name=.word> <.ws> ]
   { $*scope.define: $<var-name>.Str }
-  <initial-value=.multi-template($*scope)>
-  <.closing-block-tag("endset")>
+  <initial-value=.multi-template($*scope, %*types)>
+  <.closing-block-tag("set")>
 }
 
 rule code:sym<set-eq> {
@@ -68,6 +72,26 @@ rule code:sym<set-eq> {
   { $*scope.define: $<var-name>.Str }
 }
 
+token code:sym<macro> {
+  <.start-block> ~ <.end-block> [
+    <.ws> <.sym> <.ws>
+    <macro-name=.word>
+    <signature>
+    <.ws>
+  ]
+  <block=.multi-template($*scope, %*types)>
+  { $*scope.define: $<macro-name>.Str }
+  <.closing-block-tag("macro")>
+}
+
+rule param {
+  <word>
+}
+
+rule signature {
+  '(' ~ ')' <param>* %% ","
+}
+
 rule end-raw {
   <.block-tag("endraw")>
 }
@@ -77,7 +101,7 @@ token code:sym<raw> {
   {}
   :my $*starting-error := $/.pos;
   $<text>=[[<!end-raw>.]*]
-  <.closing-block-tag("endraw")>
+  <.closing-block-tag("raw")>
 }
 
 rule code:sym<test> {
@@ -87,8 +111,8 @@ rule code:sym<test> {
 token word { \w+ }
 
 proto rule statement {*}
-token statement:sym<variable> { <variable> }
 rule statement:sym<value> { <value> }
+#token statement:sym<variable> { <variable> }
 #rule statement:sym<word> { <word> }
 rule statement:sym<error> { <error("Variable or function not recognised")> }
 
@@ -108,16 +132,21 @@ token end-code:sym<val> { <.end-val> }
 token number { <[+-]>? [\d*\.]? \d+ }
 
 proto token value {*}
+token value:sym<comparation> { <term-op1>+ %% [ <.ws> <cmp-op> <.ws> ] }
 token value:sym<operation> { <term-op1> }
 token value:sym<number> { <number> }
+token value:sym<true> { <sym> }
+token value:sym<false> { <sym> }
+token value:sym<dstr> { <dbl-quote> ~ <dbl-quote> $<str>=[<escaped-dbl-quote>|<-["]>]* }
+token value:sym<sstr> { <single-quote> ~ <single-quote> $<str>=[<escaped-single-quote>|<-[']>]* }
 
 token dbl-quote { \" }
 token single-quote { \' }
 token escaped-dbl-quote { '\"' }
 token escaped-single-quote { "\\'" }
 
-token value:sym<dstr> { <dbl-quote> ~ <dbl-quote> $<str>=[<escaped-dbl-quote>|<-["]>]* }
-token value:sym<sstr> { <single-quote> ~ <single-quote> $<str>=[<escaped-single-quote>|<-[']>]* }
+proto token cmp-op {*}
+token cmp-op:sym<==> { <sym> }
 
 proto token op1 {*}
 token op1:sym<+> { <sym> }

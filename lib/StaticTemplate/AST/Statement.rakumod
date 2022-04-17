@@ -5,3 +5,7 @@ has $.data;
 method gist {
   "statement:\n$!data.gist().indent(2)"
 }
+
+method run {
+  $!data
+}

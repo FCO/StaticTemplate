@@ -78,13 +78,16 @@ method code:sym<raw>($/) {
   make StaticTemplate::AST::Text.new :text($<text>.Str)
 }
 
-method number($/) { make $/.Numeric }
-method value:sym<number>($/) { make $/.Numeric }
-method value:sym<dstr>($/) { make $<str>.Str }
-method value:sym<sstr>($/) { make $<str>.Str } # TODO: review
+method number($/) { make StaticTemplate::AST::Statement.new: :data($/.Numeric) }
+method value:sym<number>($/) { make $<number>.made }
+method value:sym<dstr>($/) { make StaticTemplate::AST::Statement.new: :data($<str>.Str) }
+method value:sym<sstr>($/) { make StaticTemplate::AST::Statement.new: :data($<str>.Str) } # TODO: review
 method value:sym<operation>($/) { make $<term-op1>.made }
+method value:sym<comparation>($/) { make self.op: $<term-op1>».made, $<cmp-op>».Str }
+method value:sym<true>($/) { make StaticTemplate::AST::Statement.new: :data(True) }
+method value:sym<false>($/) { make StaticTemplate::AST::Statement.new: :data(False) }
 
-method factor($/)   { make $<number>.made }
+method factor($/)   { make ($<number> // $<variable>).made }
 method term-op2($/) {
   make self.op: $<factor>».made, $<op2>».Str
 }

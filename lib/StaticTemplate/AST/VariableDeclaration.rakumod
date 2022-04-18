@@ -1,7 +1,17 @@
+use StaticTemplate::Type;
 unit class StaticTemplate::AST::VariableDeclaration;
 
-has Str $.name;
-has     $.initial-value;
+has Str                  $.name;
+has                      $.initial-value;
+has StaticTemplate::Type $.type;
+
+submethod BUILD(:$!name, :$!initial-value, :$type = "any") {
+  if $type ~~ Str {
+    $!type .= new: :name($type)
+  } else {
+    $!type = $type
+  }
+}
 
 method gist {
   [

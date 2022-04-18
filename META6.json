@@ -27,11 +27,12 @@
     "StaticTemplate::RequirementService": "lib/StaticTemplate/RequirementService.rakumod",
     "StaticTemplate::Signature": "lib/StaticTemplate/Signature.rakumod",
     "StaticTemplate::Stack": "lib/StaticTemplate/Stack.rakumod",
-    "StaticTemplate::Type": "lib/StaticTemplate/Type.rakumod"
+    "StaticTemplate::Type": "lib/StaticTemplate/Type.rakumod",
+    "StaticTemplate::WantedType": "lib/StaticTemplate/WantedType.rakumod"
   },
   "resources": [
   ],
-  "source-url": "",
+  "source-url": "https://github.com/FCO/StaticTemplate.git",
   "tags": [
   ],
   "test-depends": [

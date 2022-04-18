@@ -1,10 +1,11 @@
+use StaticTemplate::Type;
 unit class StaticTemplate::Stack;
 
 class Var {
-  has Str  $.name is required;
-  has Str  $.type = "any";
-  has UInt $.line;
-  has      $.initial-value;
+  has Str                  $.name is required;
+  has StaticTemplate::Type $.type .= type: "any";
+  has UInt                 $.line;
+  has                      $.initial-value;
 }
 
 has Var      %.vars;

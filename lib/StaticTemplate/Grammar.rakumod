@@ -13,15 +13,35 @@ method error($msg, :$comment) {
   my $not-parsed = self.target.substr: $pos, $break;
   my @lines = $parsed-so-far.lines;
   note "\nCompiling ERROR on line @lines.elems():\n";
-  note "$msg: { "\o033[32m@lines[*-1].trim-leading()\o033[33m⏏" if @lines }{ "({ $comment })" with $comment }\o033[31m$not-parsed\o033[m";
+  note "$msg: {
+    "\o033[32m@lines[*-1].trim-leading()\o033[33m⏏" if @lines
+  }{
+    "({ $comment })" with $comment
+  }\o033[31m$not-parsed\o033[m";
   exit 1;
 }
 
-my %types = <any number string boolean>.map: { $_ => StaticTemplate::Type.type($_) }
+my %types = <any number string boolean array object>.map: { $_ => StaticTemplate::Type.type($_) }
 
 token TOP {
   <multi-template(StaticTemplate::Stack, %types)>
 }
+
+token wanted-types { <list-of-wanted-types> }
+
+regex list-of-wanted-types { <wanted-type>+ %% "|" }
+
+regex wanted-type          {
+  [
+    $<base>=[
+      \w+ [
+        "[" ~ "]" <sub-types=.list-of-wanted-types>+
+      ]?
+      | "enum(" ~ ")" .*?
+    ]
+  ]
+}
+
 token multi-template($scope, %types) {
   :my $*scope := $scope.new-scope;
   :my %*types := %types;
@@ -34,6 +54,10 @@ token template:sym<code> { <code> }
 
 token text { [<!start-code>.]+ }
 
+rule type {
+  <{ %*types.keys }> "[" ~ "]" <of=~~>
+}
+
 proto rule code {*}
 rule code:sym<val> {
   <.start-val> ~ <.end-val> <statement>+ %% ";"
@@ -44,7 +68,7 @@ token block-tag($name) {
 }
 
 rule closing-block-tag($name) {
-  <block-tag("end$name")> || $ { self.error: "Could not find '\{% end$name %}' closing for tag '$name'", :comment("never closing tag") }
+  <block-tag("end$name")> || $ <error("Could not find '\{% end$name %}' closing for tag '$name'", :comment("never closing tag"))>
 }
 
 token code:sym<if> {

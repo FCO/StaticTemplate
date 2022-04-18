@@ -6,6 +6,8 @@ use StaticTemplate::AST::StatementList;
 use StaticTemplate::AST::CompUnit;
 use StaticTemplate::AST::Variable;
 use StaticTemplate::AST::VariableDeclaration;
+use StaticTemplate::Type;
+use StaticTemplate::WantedType;
 
 unit class StaticTemplate::Action;
 
@@ -27,6 +29,10 @@ method template:sym<code>($/) {
   make $<code>.made
 }
 
+method wanted-types($/) {
+  StaticTemplate::WantedType.new: $/.Str
+}
+
 method text($/) { make $/.Str }
 
 method code:sym<val>($/) {
@@ -35,6 +41,10 @@ method code:sym<val>($/) {
 }
 
 method word($/) { $/.Str }
+
+method type($/) {
+  StaticTemplate::Type.new: $/.Str
+}
 
 method statement:sym<value>($/) {
   make $<value>.made

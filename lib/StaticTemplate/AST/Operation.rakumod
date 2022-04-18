@@ -1,8 +1,9 @@
+use StaticTemplate::Type;
 unit class StaticTemplate::AST::Operation;
 
-has $.left;
-has $.right;
-has $.op;
+has     $.left;
+has     $.right;
+has Str $.op;
 
 method gist {
   [
@@ -26,3 +27,13 @@ multi method run-op("*", $left, $right) { $left * $right }
 multi method run-op("/", $left, $right) { $left / $right }
 
 multi method run-op("==", $left, $right) { $left == $right }
+
+method type {
+  if $!op eq ("=="|"!="|">"|">="|"<"|"<=") {
+    return StaticTemplate::Type.type: "boolean"
+  }
+  if $!op eq "+" && ($!left|$!right).type.isa: "string" {
+    return StaticTemplate::Type.type: "string"
+  }
+  return StaticTemplate::Type.type: "number"
+}

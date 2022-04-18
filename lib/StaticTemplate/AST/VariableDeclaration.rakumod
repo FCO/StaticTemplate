@@ -1,9 +1,11 @@
-use StaticTemplate::Type;
+use StaticTemplate::WantedType;
 unit class StaticTemplate::AST::VariableDeclaration;
 
-has Str                  $.name;
-has                      $.initial-value;
-has StaticTemplate::Type $.type;
+has Str                        $.name;
+has                            $.initial-value;
+has StaticTemplate::WantedType $.type;
+has Bool                       $.optional;
+has Str                        $.doc;
 
 submethod BUILD(:$!name, :$!initial-value, :$type = "any") {
   if $type ~~ Str {

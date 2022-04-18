@@ -37,6 +37,7 @@ my @tests =
   Q[{% set a = 2 %}{% if a == 1 %}1{% elsif a == 2 %}2{% elsif a == 3 %}3{% else %}4{% endif %}]                , Q[2],
   Q[{% set a = 3 %}{% if a == 1 %}1{% elsif a == 2 %}2{% elsif a == 3 %}3{% else %}4{% endif %}]                , Q[3],
   Q[{% set a = 4 %}{% if a == 1 %}1{% elsif a == 2 %}2{% elsif a == 3 %}3{% else %}4{% endif %}]                , Q[4],
+  Q[{% macro bla() %}{% endmacro %}]                                                                            , Q[],
 ;
 
 %*ENV<ST_TEST_MATCH> = %*ENV<ST_TEST_AST> = %*ENV<ST_TEST_RUN> = 1 if %*ENV<ST_TEST_DEBUG>;

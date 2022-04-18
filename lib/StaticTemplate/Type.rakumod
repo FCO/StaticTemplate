@@ -5,9 +5,8 @@ unit class StaticTemplate::Type;
 has ::?CLASS                  $.parent = ::?CLASS.type: "any";
 has ::?CLASS                  $.of;
 has Str()                     $.name;
-has Bool                      $.function = False;
-has StaticTemplate::Signature $.signature;
 has                           @.enum;
+has StaticTemplate::Signature $.signature;
 
 multi method type(::?CLASS:U: "any") {
   $ //= ::?CLASS.new: :name<any>, :parent(Nil)

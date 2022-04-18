@@ -8,6 +8,8 @@ use StaticTemplate::AST::Variable;
 use StaticTemplate::AST::VariableDeclaration;
 use StaticTemplate::Type;
 use StaticTemplate::WantedType;
+use StaticTemplate::AST::Param;
+use StaticTemplate::Signature;
 
 unit class StaticTemplate::Action;
 
@@ -86,6 +88,39 @@ method code:sym<set-eq>($/) {
 
 method code:sym<raw>($/) {
   make StaticTemplate::AST::Text.new :text($<text>.Str)
+}
+
+method code:sym<macro>($/) {
+  my $name = $<macro-name>.Str;
+  my $initial-value = $<block>.made;
+  my $signature = $<signature>.made;
+  my $type = StaticTemplate::WantedType.new: :name<macro>, :$signature;
+  make StaticTemplate::AST::VariableDeclaration.new: :$name, :$initial-value, :$type
+}
+
+method param:sym<positional>($/) {
+  my $var-name     = $<var-name>.Str;
+  my $default      = $<default>.made;
+  my $wanted-types = $<wanted-types>.made;
+  make StaticTemplate::AST::Param.new: :!named, :$var-name, :$default, |(:$wanted-types with $wanted-types), :optional($<optional>.Str ne "!")
+}
+method param:sym<named>($/) {
+  my $var-name     = $<var-name>.Str;
+  my $arg-name     = $<arg-name>.Str;
+  my $default      = $<default>.made;
+  my $wanted-types = $<wanted-types>.made;
+  make StaticTemplate::AST::Param.new: :named, :$arg-name, :$var-name, :$default, :$wanted-types, :optional($<optional>.Str ne "!")
+}
+method param:sym<homonamed>($/) {
+  my $var-name     = $<var-name>.Str;
+  my $default      = $<default>.made;
+  my $wanted-types = $<wanted-types>.made;
+  make StaticTemplate::AST::Param.new: :named, :$var-name, :$default, :$wanted-types, :optional($<optional>.Str ne "!")
+}
+
+method signature($/) {
+  my (:@named, :@positional) := $<param>.map(*.made).classify: { .named ?? "named" !! "positional" };
+  make StaticTemplate::Signature.new: :@named, :@positional
 }
 
 method number($/) { make StaticTemplate::AST::Statement.new: :data($/.Numeric) }

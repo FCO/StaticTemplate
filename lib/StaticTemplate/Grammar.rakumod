@@ -108,8 +108,15 @@ token code:sym<macro> {
   <.closing-block-tag("macro")>
 }
 
-rule param {
-  <word>
+proto rule param {*}
+rule param:sym<positional> {
+  <wanted-types>? <var-name=.word> $<optional>=<[?!]>? [ "=" <default=.statement> ]?
+}
+rule param:sym<named> {
+  <arg-name=word>":" <wanted-types>? <var-name=.word> $<optional>=<[?!]>? [ "=" <default=.statement> ]?
+}
+rule param:sym<homonamed> {
+  <wanted-types>? ":"<var-name=.word> $<optional>=<[?!]>? [ "=" <default=.statement> ]?
 }
 
 rule signature {

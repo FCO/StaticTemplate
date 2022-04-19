@@ -1,24 +1,40 @@
 #use Grammar::Tracer;
 use StaticTemplate::Stack;
 use StaticTemplate::Type;
+use X::StaticTemplate::CompileError;
 unit grammar StaticTemplate::Grammar;
 
-method error($msg, :$comment) {
-  my $pos = $*starting-error // self.pos;
-  my $parsed-so-far = self.target.substr(0, $pos);
-  my $break = $pos + 15;
+method error($msg, :$comment, :$tag) {
+  my ($pos, $break) = do with $tag {
+    my $pos = $tag.pos;
+    my $break = $tag.pos + 15;
+
+    $pos,
+    $break,
+  } else {
+    my $pos = self.pos;
+    my $break = $pos + 15;
+
+    $pos,
+    $break,
+  }
+
   with self.target.index("\n", $pos) {
     $break min= $_ - $pos
   }
-  my $not-parsed = self.target.substr: $pos, $break;
-  my @lines = $parsed-so-far.lines;
-  note "\nCompiling ERROR on line @lines.elems():\n";
-  note "$msg: {
-    "\o033[32m@lines[*-1].trim-leading()\o033[33m⏏" if @lines
-  }{
-    "({ $comment })" with $comment
-  }\o033[31m$not-parsed\o033[m";
-  exit 1;
+
+  my Str $not-parsed = self.target.substr: $pos, $break;
+  my $parsed-so-far  = self.target.substr(0, $pos);
+  my UInt $line      = $parsed-so-far.lines.elems;
+  my Str $last-line  = $parsed-so-far.lines[*-1];
+
+  X::StaticTemplate::CompileError.new(
+    :$line,
+    :$msg,
+    :$comment,
+    :$last-line,
+    :$not-parsed,
+  ).throw;
 }
 
 my %types = <any number string boolean array object>.map: { $_ => StaticTemplate::Type.type($_) }
@@ -67,24 +83,24 @@ token block-tag($name) {
   <.start-block> ~ <.end-block> [ <.ws> $name <.ws> ] <?>
 }
 
-rule closing-block-tag($name) {
-  <block-tag("end$name")> || $ <error("Could not find '\{% end$name %}' closing for tag '$name'", :comment("never closing tag"))>
+rule closing-block-tag($name, $tag) {
+  || <block-tag("end$name")>
+  || $ <error("Could not find '\o033[1m\{% end$name %}\o033[m' closing for tag '\o033[1m$tag.Str()\o033[m'", :comment("never closing tag"), :$tag)>
 }
 
 token code:sym<if> {
-  <.start-block> ~ <.end-block> [ <.ws> <.sym> <.ws> <condition=.statement> <.ws> ]
-  {}
-  :my $*starting-error := $/.pos;
+  $<tag>=[ <.start-block> ~ <.end-block> [ <.ws> <sym> <.ws> <condition=.statement> <.ws> ] ]
   <if-block=multi-template($*scope, %*types)>+ % [ <.start-block> ~ <.end-block> [ <.ws> "elsif" <.ws> <condition=.statement> <.ws> ] ]
   [ <.start-block> ~ <.end-block> [ <.ws> "else" <.ws> ] <else-block=.multi-template($*scope, %*types)> ]?
-  <.closing-block-tag("if")>
+  <.closing-block-tag("if", $<tag>)>
 }
 
 token code:sym<set> {
-  <.start-block> ~ <.end-block> [ <.ws> <.sym> <.ws> <var-name=.word> <.ws> ]
+  $<tag>=[ <.start-block> ~ <.end-block> [ <.ws> <sym> <.ws> <var-name=.word> <.ws> ] ]
+  {}
   { $*scope.define: $<var-name>.Str }
   <initial-value=.multi-template($*scope, %*types)>
-  <.closing-block-tag("set")>
+  <.closing-block-tag("set", $<tag>)>
 }
 
 rule code:sym<set-eq> {
@@ -97,15 +113,17 @@ rule code:sym<set-eq> {
 }
 
 token code:sym<macro> {
-  <.start-block> ~ <.end-block> [
-    <.ws> <.sym> <.ws>
-    <macro-name=.word>
-    <signature>
-    <.ws>
+  $<tag>=[
+      <.start-block> ~ <.end-block> [
+      <.ws> <sym> <.ws>
+      <macro-name=.word>
+      <signature>
+      <.ws>
+    ]
   ]
   <block=.multi-template($*scope, %*types)>
   { $*scope.define: $<macro-name>.Str }
-  <.closing-block-tag("macro")>
+  <.closing-block-tag("macro", $<tag>)>
 }
 
 proto rule param {*}
@@ -128,11 +146,10 @@ rule end-raw {
 }
 
 token code:sym<raw> {
-  <.block-tag("raw")>
+  <tag=.block-tag("raw")>
   {}
-  :my $*starting-error := $/.pos;
   $<text>=[[<!end-raw>.]*]
-  <.closing-block-tag("raw")>
+  <.closing-block-tag("raw", $<tag>)>
 }
 
 rule code:sym<test> {

@@ -1,5 +1,19 @@
+use StaticTemplate::RequirementService;
 unit class StaticTemplate;
 
+method eval(Str $code) {
+  CATCH {
+    $.catch-error($_)
+  }
+  await StaticTemplate::RequirementService.instance.eval: $code
+}
+
+method catch-error($_) {
+  when X::StaticTemplate::CompileError {
+    note .message;
+    exit 1
+  }
+}
 
 =begin pod
 

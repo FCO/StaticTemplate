@@ -1,5 +1,6 @@
 use StaticTemplate::Grammar;
 use StaticTemplate::Action;
+use X::StaticTemplate::CompileError;
 
 unit class StaticTemplate::Parser;
 

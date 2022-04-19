@@ -29,7 +29,8 @@
     "StaticTemplate::Signature": "lib/StaticTemplate/Signature.rakumod",
     "StaticTemplate::Stack": "lib/StaticTemplate/Stack.rakumod",
     "StaticTemplate::Type": "lib/StaticTemplate/Type.rakumod",
-    "StaticTemplate::WantedType": "lib/StaticTemplate/WantedType.rakumod"
+    "StaticTemplate::WantedType": "lib/StaticTemplate/WantedType.rakumod",
+    "X::StaticTemplate::CompileError": "lib/X/StaticTemplate/CompileError.rakumod"
   },
   "resources": [
   ],

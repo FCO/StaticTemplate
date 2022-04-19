@@ -1,0 +1,18 @@
+use Test;
+use StaticTemplate::Grammar;
+use X::StaticTemplate::CompileError;
+
+my @tests = 
+  qq[\{% set bla %}test test test]                              , { :1line, :msg{ .words.any eq <set bla endset>.any }, :comment("never closing tag") },
+  qq[\{% set bla %}test\{% endset %}\n\{% set ble %}test test]  , { :2line, :msg{ .words.any eq <set ble endset>.any }, :comment("never closing tag") },
+  qq[\{% set bla %}test\n\{% set ble %}test test\{% endset %}]  , { :1line, :msg{ .words.any eq <set bla endset>.any }, :comment("never closing tag") },
+;
+
+%*ENV<ST_TEST_MATCH> = %*ENV<ST_TEST_AST> = %*ENV<ST_TEST_RUN> = 1 if %*ENV<ST_TEST_DEBUG>;
+
+for @tests -> Str $tmpl, %matchers {
+  throws-like { StaticTemplate::Grammar.parse: $tmpl }, X::StaticTemplate::CompileError, |%matchers;
+}
+
+done-testing;
+

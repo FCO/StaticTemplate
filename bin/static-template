@@ -2,6 +2,7 @@
 
 use StaticTemplate;
 
-multi MAIN(IO(Str) :i(:in(:input(:$input-dir)))!, IO(Str) :o(:out(:output(:$output-dir)))) {
+multi MAIN(IO(Str) :i(:in(:input(:$input-dir)))!, IO(Str) :o(:out(:output(:$output-dir))), Bool :$fatal) {
+  my $PROCESS::FATAL = $fatal;
   await StaticTemplate.render-dir: $input-dir, :$output-dir
 }

@@ -33,6 +33,10 @@ method render-dir(IO() $dir, :$cwd = $dir, :$extension = "njk", IO() :$output-di
         when X::StaticTemplate::CompileError {
           note "\o033[31;1mERROR\o033[m on file '\o033[1m{ $file.path }\o033[m':";
           note .message;
+          if $*FATAL {
+            note "Using \o033[1m--fatal\o033[m exiting...";
+            exit(1)
+          }
           note "\o033[1mCompiling other files...\o033[m";
         }
       }

@@ -5,7 +5,7 @@ use X::StaticTemplate::CompileError;
 unit class StaticTemplate::Parser;
 
 method parse-file($file) {
-  my $match = StaticTemplate::Grammar.parse-file: $file, :actions(StaticTemplate::Action);
+  my $match = StaticTemplate::Grammar.parsefile: $file, :actions(StaticTemplate::Action);
   $match.made
 }
 

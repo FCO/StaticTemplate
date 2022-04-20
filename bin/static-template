@@ -1,0 +1,7 @@
+#!/usr/bin/env raku
+
+use StaticTemplate;
+
+multi MAIN(IO(Str) :i(:in(:input(:$input-dir)))!, IO(Str) :o(:out(:output(:$output-dir)))) {
+  await StaticTemplate.render-dir: $input-dir, :$output-dir
+}

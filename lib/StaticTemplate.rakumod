@@ -1,4 +1,5 @@
 use StaticTemplate::RequirementService;
+use X::StaticTemplate::CompileError;
 unit class StaticTemplate;
 
 method eval(Str $code) {
@@ -27,7 +28,16 @@ method render-dir(IO() $dir, :$cwd = $dir, :$extension = "njk", IO() :$output-di
       }
     } else { &say }
 
-    StaticTemplate::RequirementService.instance.get($file.path).then({ output .result.run })
+    StaticTemplate::RequirementService.instance.get($file.path).then({
+      CATCH {
+        when X::StaticTemplate::CompileError {
+          note "\o033[31;1mERROR\o033[m on file '\o033[1m{ $file.path }\o033[m':";
+          note .message;
+          note "\o033[1mCompiling other files...\o033[m";
+        }
+      }
+      output .result.run
+    })
   }
 }
 

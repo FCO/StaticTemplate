@@ -8,7 +8,7 @@ has                        %!requires;
 
 method new { !!! }
 
-method instance(::?CLASS:U:) { $ = self.bless }
+method instance(::?CLASS:U:) { $ //= self.bless }
 
 method eval-to-ast(Str $code) {
   start $!parser.parse: $code

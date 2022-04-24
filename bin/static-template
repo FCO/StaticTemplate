@@ -2,7 +2,11 @@
 
 use StaticTemplate;
 
-multi MAIN(IO(Str) :i(:in(:input(:$input-dir)))!, IO(Str) :o(:out(:output(:$output-dir))), Bool :$fatal) {
+multi MAIN(Str :e(:$eval)!) {
+  say StaticTemplate.new.eval: $eval
+}
+
+multi MAIN(IO(Str) :i(:in(:input(:$input-dir)))!, IO(Str) :o(:out(:output(:$output-dir))), Bool :$fatal, Bool :w(:$watch)) {
   my $PROCESS::FATAL = $fatal;
-  await StaticTemplate.render-dir: $input-dir, :$output-dir
+  await StaticTemplate.new(:$watch).render-dir: $input-dir, :$output-dir
 }

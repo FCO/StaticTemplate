@@ -20,7 +20,7 @@ StaticTemplate is ...
 AUTHOR
 ======
 
-    <foliveira@gocardless.com>
+    <fernandocorrea@gmail.com>
 
 COPYRIGHT AND LICENSE
 =====================
